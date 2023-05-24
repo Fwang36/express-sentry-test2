@@ -44,25 +44,16 @@ Sentry.init({
         return event
     },
 
-    // integrations: [
-    //     new Sentry.Integrations.Context({
-    //         device: false
-    //     }),
-    //     new Sentry.Integrations.Http({ 
-    //         tracing: true,
-            
-
-    //         // shouldCreateSpanForRequest: url => {
-    //         //     console.log("TESTING", url)
-    //         //     return url
-    //         // }
-    //      }),
-    //     new ProfilingIntegration(),
-    //     // new Tracing.Integrations.GraphQL(),
-    //     new Tracing.Integrations.Express({
-    //         app: server,
-    //     }),
-    // ],
+    integrations: [
+        new Sentry.Integrations.Http({ 
+            tracing: true,
+         }),
+        new ProfilingIntegration(),
+        // new Tracing.Integrations.GraphQL(),
+        new Tracing.Integrations.Express({
+            app: server,
+        }),
+    ],
     // integrations: function (integrations) {
     //     return integrations.filter(function (integration) {
     //         return integration.name !== "Context"
