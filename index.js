@@ -223,7 +223,7 @@ app.get('/close-sentry', (req, res) => {
 })
 app.get('/e4', (req, res) => {
     const testProfileGithubError = () => {
-
+        console.log("Inside Test FUNCTION")
         Sentry.captureException(new Error("testingg"))
         res.send("done")
     }
