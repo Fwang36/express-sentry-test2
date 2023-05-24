@@ -59,11 +59,6 @@ Sentry.init({
     //         return integration.name !== "Context"
     //     })
     // },
-
-    integrations:[new Sentry.Integrations.Context({
-        device: false,
-    }), 
-        ],
     // beforeBreadcrumb(breadcrumb, hint){
     //     console.log(breadcrumb)
     //     Sentry.captureMessage(breadcrumb.message)
