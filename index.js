@@ -222,9 +222,13 @@ app.get('/close-sentry', (req, res) => {
     res.send("sentry has closed")
 })
 app.get('/e4', (req, res) => {
+    const testProfileGithubError = () => {
 
-    Sentry.captureException(new Error("testingg"))
-    res.send("done")
+        Sentry.captureException(new Error("testingg"))
+        res.send("done")
+    }
+
+    testProfileGithubError()
 })
 
 app.get("/e3", (req, res) => {
