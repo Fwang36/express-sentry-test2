@@ -1,4 +1,4 @@
-export default function makeid() {
+export function makeid() {
     let result = '';
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     const charactersLength = characters.length;
@@ -9,3 +9,15 @@ export default function makeid() {
     }
     return result;
 }
+
+
+export function return10() {
+  let result = 0;
+  for (let i = 0; i < 5; i++) {
+    result = result + i
+  };
+
+  return result
+}
+
+console.log(return10())

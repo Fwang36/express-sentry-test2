@@ -5,13 +5,20 @@ import logger from 'morgan'
 import * as Sentry2 from '@sentry/node';
 import { RewriteFrames } from "@sentry/integrations";
 import axios from "axios";
-import { ProfilingIntegration } from "@sentry/profiling-node";
+// import { ProfilingIntegration } from "@sentry/profiling-node";
 import morgan from "morgan"
+import { makeid, return10 } from "./randoms.js";
+import fs from "fs";
+import {request} from 'gaxios'
+
 
 
 const app = express()
 const server = express()
 const env = "dev"
+
+
+console.log(String.raw`hello`)
 
 Sentry.init({
     // enabled: false,
@@ -19,15 +26,24 @@ Sentry.init({
     debug: true,
     // defaultIntegrations: false,
     dsn: 'https://c29bb6e733b14ec69187aac9d121f592@o1407376.ingest.sentry.io/4504039154974720',
-    release: "2.9898",
     maxValueLength: 500,
-    tracePropagationTargets: ['127'],
-    sampleRate: env == "production" ? 1 : 1,
-    
-    // tracesSampler(samplingContext) {
-    //     // console.log("SAMPLE", samplingContext)
-    //     return 1
+    // environment: "GroupTest",
+    // includeLocalVariables: true,
+    // dist: "2",
+    // tracePropagationTargets: ['127'],
+    // sampleRate: env == "production" ? 1 : 1,
+    release: "com.staging@777",
+    sendDefaultPii: true,
+
+    // sampleRate: 0,
+    // environment: "GroupTest",
+    // initialScope: {
+    //     transaction: "TEST",
+    //     tags: {
+    //         transaction: "[FILTERED]"
+    //     }
     // },
+    // defaultIntegrations: true,
 
 //     ignoreErrors: [
 //         "e",
@@ -37,70 +53,139 @@ Sentry.init({
 // ],
 
     beforeSend(event, hint) {
-    //    const exception = hint.originalException
-        console.log("ERROR FOUND")
+
+        // console.log(event.exception.values[0].stacktrace)
         // console.log(event)
-        // console.log("message", event.message)
+        // event.contexts.newContext = {testkey: "testValue"}
+        // console.log(event)
+        // console.log(event)
+        // delete event.transaction
+        // delete event.tags.transaction
+        // event.contexts.event = {event}
+        // console.log(event)
+        // console.log(event.level);
+        // if (event.level == "error") {
+        //   Sentry.showReportDialog({ eventId: event.event_id });
+        // }
+        // console.log(event.request.headers)
+        // console.log(event.exception.values[0].stacktrace)
         return event
     },
-
+    enableTracing: true,
+    tracesSampleRate: 1,
+    // integrations: function (integrations) {
+    //         // integrations will be all default integrations
+    //         return integrations.filter((integration) => 
+    //         integration.name !== "OnUncaughtException" 
+    //         && integration.name !== "OnUnhandledRejection"
+    //         );
+    // },
     integrations: [
         new Sentry.Integrations.Http({ 
             tracing: true,
          }),
-        new ProfilingIntegration(),
+        // new ProfilingIntegration({
+        
+        // }),
         // new Tracing.Integrations.GraphQL(),
         new Tracing.Integrations.Express({
             app: server,
         }),
+
+
+
+        new Sentry.Integrations.LocalVariables({
+            captureAllExceptions: true,
+        }),
+        new RewriteFrames({
+            iteratee: (frame) => {
+                
+                // frame.abs_path = String.raw`C:\express2\index.js`
+                // frame.filename = String.raw`C:\express2\index.js`
+
+                console.log(frame)
+                return frame
+            }
+        })
+
     ],
-    // integrations: function (integrations) {
-    //     return integrations.filter(function (integration) {
-    //         return integration.name !== "Context"
-    //     })
-    // },
+
     // beforeBreadcrumb(breadcrumb, hint){
     //     console.log(breadcrumb)
     //     Sentry.captureMessage(breadcrumb.message)
     //     return breadcrumb
     //   },
-
-    profilesSampleRate:  1.0,
-    // tracesSampler: (samplingContext) => {
-    //     console.log("sample",samplingContext)
-    //     // console.log("request", request)
-    //     // let sample = 0
-    //     // console.log("CONTEXT", samplingContext)
-    //     // console.log("REQUEST", samplingContext.transactionContext.metadata.request.socket.server)
+    // profilesSampler(samplingContext) {
+    //     console.log("Profile", samplingContext)
     //     return 1
     // },
-    tracesSampleRate: 1.0,
-    // beforeSendTransaction(event) {
-    //     console.log("------")
-    //     console.log("BEFORESENDTRANSACTION", event)
+    // profilesSampleRate:  1.0,
+    tracesSampler: (samplingContext) => {
+        
+        // console.log("request", request)
+        // let sample = 0
+        // console.log("CONTEXT", samplingContext)
+        // console.log("REQUEST", samplingContext.transactionContext.metadata.request.socket.server)
+        return 1
+    },
+    // tracesSampleRate: 1.0,
+    beforeSendTransaction(event) {
+        // console.log("------")
 
+        // if(event.transaction == "GET /Transaction"){
+        //     return null
+        // }
+        // // event.transaction = "NFSEFJDJDSFJFD"
+        // console.log(event.transaction)
+        console.log("event", event.measurements)
+        // event.user = {
+        //     id: "123455",
+        //     ip_address: "33.12.2.4",
+        //     email: "fra@gmail.com",
+        //     geo: {
+        //         country_code: "usa",
+        //         city: "baltimore"
+        //     }
+        // }
 
-    //     // console.log(event.start_timestamp)
-    //     // event.timestamp = 1675550000
+        // console.log("after", event.user)
 
-    //     return event
-    // }
+        return event
+    }
 });
 
+// console.log(Sentry.getCurrentHub().getClient()._integrations)
+Sentry.setTag("hi", "hello")
 
 
+
+
+// const res = await request({
+//   url: 'https://www.googleapis.cosdfsfdm/discovery/v1/apis/',
+// });
+
+// console.log(res)
+
+
+// Sentry.addBreadcrumb({
+//     // category: "auth",
+//     message: "Authenticated user password",
+//     level: "info",
+//   });
+
+
+Sentry.addBreadcrumb({
+    message: "hello testing custom breadcrumb",
+    level: "info",
+  });
 // Sentry.setExtra("ext", {
 //     params: "auth",
 //     request: "testing"
 // })
 // console.log(Sentry.getCurrentHub().getClient()._options.integrations)
 
-Sentry.setContext("character", {
-    name: "Mighty Fighter",
-    age: 19,
-    params: "auth",
-
-    attack_type: "melee",
+Sentry.setContext("unreal", {
+    crash_type: "Ensure",
   });
 
 Sentry.setExtra("test", {
@@ -108,28 +193,27 @@ Sentry.setExtra("test", {
     params: "auth"
 })
 
-Sentry.setTag("TransactionTag", "ewthef")
-app.use(logger('tiny'))
+const client = Sentry.getCurrentHub().getClient();
 
+// lifecycle hook to capture an event
 
+// if (client) {
+//   client.on('beforeEnvelope', (envelope) => console.log(envelope));
+// }
 app.use(morgan("combined"))
 
 app.use(Sentry.Handlers.tracingHandler());
-// app.use(Sentry.Handlers.requestHandler());
+app.use(Sentry.Handlers.requestHandler());
 
-Sentry.configureScope(scope => {
-    scope.addAttachment({
-        filename: "testAttachment.txt",
-        data: "someContent"
-    })
-})
+// console.log("HUB", Sentry.getCurrentHub())
+// console.log("SCOPE",Sentry.getCurrentHub().getScope())
 
-Sentry.configureScope(scope => {
-    scope.setTags({
-        test: "tag1",
-        test2: "tag2"
-    })
-})
+// console.log("CLIENT",Sentry.getCurrentHub().getClient())
+
+Sentry.withScope(function (scope) {
+    scope.setTag("LOCALTAG", "LOCALVALUE")
+    // Sentry.captureException(new Error("test?"))
+    app.use(Sentry.Handlers.errorHandler());
 
 app.get("/apicall", function mainHandler(req, res) {
     let varOne
@@ -157,27 +241,6 @@ app.get("/apicall", function mainHandler(req, res) {
     })
 })
 
-app.get("/apicall2", function mainHandler(req, res) {
-    res.send(["one", "two", "three"])
-})
-
-
-Sentry.setUser({id: "[BigInt: 59]"})
-// console.log(Sentry.getCurrentHub().getScope())
-app.get('/start2', function mainHandler(req,res) {
-    const transaction = Sentry.startTransaction()
-    res.send("done")
-})
-
-app.get('/editscope', function mainHandler(req, res) {
-    console.log(Sentry.getCurrentHub().getScope()._span.spanRecorder._maxlen)
-    res.send("done")
-})
-
-app.get('/flush', function mainHandler(req, res) {
-    Sentry.flush()
-    res.send("done")
-})
 app.get('/', function mainHandler(req, res) {
     // const transaction = Sentry.getCurrentHub().getScope().getTransaction()
 
@@ -190,38 +253,102 @@ app.get('/', function mainHandler(req, res) {
     res.send('hi')
 });
 
-app.get('/get', function mainHandler(req,res) {
-    app.get('/test', function mainHandler(req, res) {
-        res.send("the")
-    })
+
+app.get('/gaxios', async function mainHandler(req,respppp) {
+    const res = request({
+        url: 'https://www.googlesdgjhsdkjfsdy/v1/apis/',
+    });
+
+    res.send("gaxios")
 })
 
-app.get('/synthetic', function mainHandler(req, res) {
-    Sentry.captureException(new Error("hey testing", {
-        message: "testingsahdahsjkdashj"
-    }))
-    console.log(env)
-    res.send("done")
+
+app.get('/e6', async function mainHandler(req, res) {
+    throw new Error("e6 error")
+    res.send("hi")
+})
+
+app.get('/e7', async function mainHandler(req, res) {
+    throw new Error("testing integrations")
+    res.send("e7")
 })
 
 app.get('/debug', function rootHandler(req,res) {
 
-    Sentry.setTag("server-sdsdname", "teing2")
+    try {
 
-    // throw new Error("Error222")
-    throw new Error("testAlert")
+        const test1 = "hello"
+
+        hi(test1)
+    } catch(e) {
+        new File(e, "error.txt", {
+            type: "text/plain",
+        })
+
+        Sentry.captureException(e)
+
+        res.send("hi")
+    }
+})
 })
 
-app.get("/seed", function mainHandler(req, res) {
-    Sentry.captureMessage("testMessage")
-    res.send("dont")
+app.get('/newError', async function mainHandler(req,res) {
+    Sentry.captureException(new Error(error))
+    res.send("hello")
 })
 
-app.get('/close-sentry', (req, res) => {
-    Sentry.close()
-    res.send("sentry has closed")
+app.get('/cron', async function mainHandler(req, res) {
+    const checkInId = Sentry.captureCheckIn({
+        monitorSlug: "nodecrons",
+        status: "in_progress",
+      });
+      
+
+        console.log("cron task done")
+
+            
+        Sentry.captureCheckIn({
+          checkInId,
+          monitorSlug: "nodecrons",
+          status: "ok",
+        });
+    
+
+    
+
+      
+
+ 
+
+        //  Sentry.captureCheckIn({
+        //     checkInId,
+        //     monitorSlug: "nodecrons",
+        //     status: "error",
+        //   });
+          res.send("done")
+     
+
 })
+
+app.get('/attach', function mainHandler(req, res) {
+    Sentry.configureScope(scope => {
+        scope.addAttachment({
+            filename: "testAttachment.txt",
+            data: "someContent"
+        })
+        Sentry.captureMessage("Testing")
+        res.send("hello")
+    })
+})
+
+app.get('/throw', (req, res) => {
+    throw new Error("thrown")
+    res.send("thrown")
+})
+
+
 app.get('/e4', (req, res) => {
+    const variable222 = "hello"
     const testProfileGithubError = () => {
         console.log("Inside Test FUNCTION")
         Sentry.captureException(new Error("testingg"))
@@ -294,24 +421,51 @@ app.get('/pro', function mainHandler(req, res) {
     console.log(promise2)
 })
 
-app.get('/Transaction', function mainHandler(req, res) {
-    const transaction = Sentry.getCurrentHub().getScope().getTransaction()
-    const transSpan = Sentry.startTransaction({name: "TESTSPAN"})
+app.get('/Transaction', async function mainHandler(req, res) {
+    if (Sentry.getCurrentHub().getScope().getTransaction()){
+        Sentry.getCurrentHub().getScope().getTransaction().finish()
+    }
+    const transaction = Sentry.startTransaction({name: "hello"})
+    Sentry.getCurrentHub().configureScope((scope) => scope.setSpan(transaction));
+    transaction.setMeasurement("memoryUsed", 123, "byte");
+    transaction.setMeasurement("ui.footerComponent.render", 1.3, "second");
+    transaction.setMeasurement("localStorageRead", 4);
+    transaction.setMeasurement("localStorage_Read", 10);
+    transaction.setMeasurement("localStorage.Read_time", 11230);
+    transaction.setMeasurement("localStorage.Read", 1123333);
+    transaction.setMeasurement("localStorage.Read.hello.jordan", 1123333);
 
-    Sentry.getCurrentHub().configureScope(scope => scope.setSpan(transSpan));
+    await fetch("https://http.cat/200")
+    .then(response => {
+        console.log(response)
+    })
+    .catch(error => {
+        console.error(error)
+        Sentry.captureException(error)
+    })
+    // const transSpan = Sentry.startTransaction({name: "TESTSPAN"})
+
+    // Sentry.getCurrentHub().configureScope(scope => scope.setSpan(transSpan));
     
     const span = transaction.startChild({
         data: {
-            transSpan
+            // transSpan
         },
-        op: 'task',
-        description: `processing shopping cart result`,
+        op: 'auth',
+        description: `59d74293-5def-4384-bfa4-c604a0687bb2`,
     });
-    span.finish()
-    
-    transSpan.finish()
-    console.log(span)
-    transaction.finish()
+
+     span.finish()
+     transaction.finish()
+     try{
+
+         Sentry.captureException(new Error("test span error"))
+     } finally {
+
+        //  transaction.setStatus("internal_error")
+         transaction.finish()
+     }
+    // transSpan.finish()
    
     res.send("done")
 })
@@ -320,17 +474,11 @@ app.get('/T2', function mainHandler(req,res) {
     const transaction = Sentry.startTransaction({
         name:"index.TestTransaction",
         sampled: true,
-        startTimestamp: (1676060157916/1000)-864000,
         // trimEnd: true
     })
-    const span = transaction.startChild({
-        op: "time",
-        startTimestamp: (1676060157916/1000)-86400,
-        endTimestamp: (1676060157916/1000)+86400
-    })
-    span.finish()
-    transaction.finish()
-    res.send("t2 done")
+
+
+
 })
 
 app.get('/axios', function mainHandler(req, res) {
@@ -357,9 +505,15 @@ app.get('/resError', function mainHandler(req,res) {
     }
 })
 
+app.get("/context", function mainHandler(req,res) {
+    console.log(Sentry.getCurrentHub().getScope()._contexts)
+    res.send("done")
+})
 
-
-
+app.get("/testError", function mainHandler(req, res) {
+    Sentry.captureException(new Error("testingDsn"))
+    res.send("done")
+})
 
 
 app.use(Sentry.Handlers.errorHandler());
