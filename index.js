@@ -32,7 +32,7 @@ Sentry.init({
     // dist: "2",
     // tracePropagationTargets: ['127'],
     // sampleRate: env == "production" ? 1 : 1,
-    // release: "com.staging@777",
+    release: "2234892u42384u23",
     sendDefaultPii: true,
 
     // sampleRate: 0,
