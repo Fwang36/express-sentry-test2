@@ -270,7 +270,10 @@ app.get('/e8', async function mainHandler(req, res) {
 
 })
 
+app.get('/e9', async function mainHandler(req, res) {
+    throw new Error("hello9")
 
+})
 app.get('/debug', function rootHandler(req,res) {
 
     try {
