@@ -32,7 +32,7 @@ Sentry.init({
     // dist: "2",
     // tracePropagationTargets: ['127'],
     // sampleRate: env == "production" ? 1 : 1,
-    release: "2234892u42384u23",
+    release: "testMultiProjectResolve",
     sendDefaultPii: true,
 
     // sampleRate: 0,
@@ -100,8 +100,8 @@ Sentry.init({
         new RewriteFrames({
             iteratee: (frame) => {
                 
-                // frame.abs_path = String.raw`C:\express2\index.js`
-                // frame.filename = String.raw`C:\express2\index.js`
+                frame.abs_path = String.raw`C:/express2/index.js`
+                frame.filename = String.raw`C:/express2/index.js`
 
                 console.log(frame)
                 return frame
@@ -242,16 +242,18 @@ app.get("/apicall", function mainHandler(req, res) {
 })
 
 app.get('/', function mainHandler(req, res) {
-    // const transaction = Sentry.getCurrentHub().getScope().getTransaction()
+    const transaction = Sentry.getCurrentHub().getScope().getTransaction()
 
-    // if (transaction) {
-    //     console.log("transFound", transaction)
-    //     transaction.op = "test"
-    //     console.log("after", transaction)
-    //     res.send("hi2")
-    // }
+    if (transaction) {
+
+        console.log("transFound", transaction)
+        transaction.op = "test"
+        console.log("after", transaction)
+        res.send("hi2")
+    }
     res.send('hi')
 });
+
 
 
 app.get('/gaxios', async function mainHandler(req,respppp) {
