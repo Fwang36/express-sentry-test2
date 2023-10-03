@@ -18,6 +18,7 @@ const server = express()
 const env = "dev"
 
 
+console.log(String.raw`hello`)
 
 Sentry.init({
     // enabled: false,
