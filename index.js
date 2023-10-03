@@ -274,6 +274,12 @@ app.get('/e7', async function mainHandler(req, res) {
     res.send("e7")
 })
 
+app.get('/e8', async function mainHandler(req, res) {
+    throw new Error("hello")
+
+})
+
+
 app.get('/debug', function rootHandler(req,res) {
 
     try {
