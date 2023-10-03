@@ -96,16 +96,7 @@ Sentry.init({
         new Sentry.Integrations.LocalVariables({
             captureAllExceptions: true,
         }),
-        new RewriteFrames({
-            iteratee: (frame) => {
-                
-                frame.abs_path = String.raw`C:/express2/index.js`
-                frame.filename = String.raw`C:/express2/index.js`
 
-                console.log(frame)
-                return frame
-            }
-        })
 
     ],
 
