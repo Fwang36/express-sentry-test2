@@ -274,6 +274,11 @@ app.get('/e9', async function mainHandler(req, res) {
     throw new Error("hello9")
 
 })
+
+app.get('/e10', async function mainHandler(req, res) {
+    throw new Error("hello10")
+
+})
 app.get('/debug', function rootHandler(req,res) {
 
     try {
