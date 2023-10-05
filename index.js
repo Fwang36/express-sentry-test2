@@ -154,7 +154,6 @@ console.log("234u23u")
 
 
 
-console.log("main1")
 console.log("tehiwqerhweiu")
 console.log("ewijrhwoirhjew")
 console.log("main2")
