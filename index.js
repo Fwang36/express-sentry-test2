@@ -148,6 +148,7 @@ Sentry.setTag("hi.123", "hello")
 
 console.log("new branch")
 console.log("1")
+console.log("2")
 
 // const res = await request({
 //   url: 'https://www.googleapis.cosdfsfdm/discovery/v1/apis/',
