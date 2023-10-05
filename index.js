@@ -127,7 +127,6 @@ Sentry.init({
         // }
         // // event.transaction = "NFSEFJDJDSFJFD"
         // console.log(event.transaction)
-        console.log("event", event.measurements)
         // event.user = {
         //     id: "123455",
         //     ip_address: "33.12.2.4",
@@ -145,7 +144,7 @@ Sentry.init({
 });
 
 // console.log(Sentry.getCurrentHub().getClient()._integrations)
-Sentry.setTag("hi", "hello")
+Sentry.setTag("hi.123", "hello")
 
 
 
@@ -277,6 +276,12 @@ app.get('/e9', async function mainHandler(req, res) {
 
 app.get('/e10', async function mainHandler(req, res) {
     throw new Error("hello10")
+
+})
+
+
+app.get('/e11', async function mainHandler(req, res) {
+    throw new Error("hello11")
 
 })
 app.get('/debug', function rootHandler(req,res) {
