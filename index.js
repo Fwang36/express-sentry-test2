@@ -28,7 +28,7 @@ Sentry.init({
     maxValueLength: 500,
     environment: "GroupTest",
     // includeLocalVariables: true,
-    // dist: "2",
+    dist: "2",
     // tracePropagationTargets: ['127'],
     // sampleRate: env == "production" ? 1 : 1,
     release: "hello555522222",
