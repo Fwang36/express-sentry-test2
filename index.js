@@ -5,14 +5,14 @@ import logger from 'morgan'
 import * as Sentry2 from '@sentry/node';
 import { RewriteFrames } from "@sentry/integrations";
 import axios from "axios";
-// import { ProfilingIntegration } from "@sentry/profiling-node";
+import { ProfilingIntegration } from "@sentry/profiling-node";
 import morgan from "morgan"
 import { makeid, return10 } from "./randoms.js";
 import fs from "fs";
 import {request} from 'gaxios'
 
 
-
+// const Sentry = require("@sentry/node")
 const app = express()
 const server = express()
 const env = "dev"
@@ -83,14 +83,16 @@ Sentry.init({
         new Sentry.Integrations.Http({ 
             tracing: true,
          }),
-        // new ProfilingIntegration({
+        new ProfilingIntegration({
         
-        // }),
+        }),
         // new Tracing.Integrations.GraphQL(),
         new Tracing.Integrations.Express({
             app: server,
         }),
+        new Sentry.Integrations.Mysql({
 
+        }),
 
 
         new Sentry.Integrations.LocalVariables({
@@ -109,7 +111,7 @@ Sentry.init({
     //     console.log("Profile", samplingContext)
     //     return 1
     // },
-    // profilesSampleRate:  1.0,
+    profilesSampleRate:  1.0,
     tracesSampler: (samplingContext) => {
         
         // console.log("request", request)
@@ -176,6 +178,22 @@ Sentry.addBreadcrumb({
     message: "hello testing custom breadcrumb",
     level: "info",
   });
+
+  Sentry.addBreadcrumb({
+    category: "auth",
+    message: "Authenticated user ",
+    level: "info",
+      });
+
+      Sentry.addBreadcrumb({
+        category: "auth",
+        message: "Authenticated user222222 ",
+        level: "info",
+        data: {auth: "auth", 
+        url: "auth",
+        new: "auth"
+    }
+          });
 // Sentry.setExtra("ext", {
 //     params: "auth",
 //     request: "testing"
@@ -198,7 +216,7 @@ const client = Sentry.getCurrentHub().getClient();
 // if (client) {
 //   client.on('beforeEnvelope', (envelope) => console.log(envelope));
 // }
-app.use(morgan("combined"))
+// app.use(morgan("combined"))
 
 app.use(Sentry.Handlers.tracingHandler());
 app.use(Sentry.Handlers.requestHandler());
@@ -212,6 +230,9 @@ Sentry.withScope(function (scope) {
     scope.setTag("LOCALTAG", "LOCALVALUE")
     // Sentry.captureException(new Error("test?"))
     app.use(Sentry.Handlers.errorHandler());
+
+
+
 
 app.get("/apicall", function mainHandler(req, res) {
     let varOne
