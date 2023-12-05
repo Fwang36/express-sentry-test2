@@ -26,7 +26,7 @@ Sentry.init({
     // defaultIntegrations: false,
     dsn: 'https://c29bb6e733b14ec69187aac9d121f592@o1407376.ingest.sentry.io/4504039154974720',
     maxValueLength: 500,
-    // environment: "GroupTest",
+    environment: "GroupTest",
     // includeLocalVariables: true,
     // dist: "2",
     // tracePropagationTargets: ['127'],
