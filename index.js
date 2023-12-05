@@ -54,7 +54,7 @@ Sentry.init({
     beforeSend(event, hint) {
 
         // console.log(event.exception.values[0].stacktrace)
-        // console.log(event)
+        console.log(event)
         // event.contexts.newContext = {testkey: "testValue"}
         // console.log(event)
         // console.log(event)
