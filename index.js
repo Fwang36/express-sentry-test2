@@ -5,7 +5,8 @@ import logger from 'morgan'
 import * as Sentry2 from '@sentry/node';
 import { RewriteFrames } from "@sentry/integrations";
 import axios from "axios";
-import { ProfilingIntegration } from "@sentry/profiling-node";
+import cors from "cors"
+// import { ProfilingIntegration } from "@sentry/profiling-node";
 import morgan from "morgan"
 import { makeid, return10 } from "./randoms.js";
 import fs from "fs";
@@ -15,8 +16,7 @@ import {request} from 'gaxios'
 // const Sentry = require("@sentry/node")
 const app = express()
 const server = express()
-const env = "dev"
-
+app.use(cors())
 
 
 Sentry.init({
@@ -26,12 +26,12 @@ Sentry.init({
     // defaultIntegrations: false,
     dsn: 'https://c29bb6e733b14ec69187aac9d121f592@o1407376.ingest.sentry.io/4504039154974720',
     maxValueLength: 500,
-    environment: "GroupTest",
+    // environment: "GroupTest",
     // includeLocalVariables: true,
     dist: "2",
     // tracePropagationTargets: ['127'],
     // sampleRate: env == "production" ? 1 : 1,
-    release: "hello555522222",
+    release: "hello@123",
     sendDefaultPii: true,
 
     // sampleRate: 0,
@@ -53,21 +53,6 @@ Sentry.init({
 
     beforeSend(event, hint) {
 
-        // console.log(event.exception.values[0].stacktrace)
-        console.log(event)
-        // event.contexts.newContext = {testkey: "testValue"}
-        // console.log(event)
-        // console.log(event)
-        // delete event.transaction
-        // delete event.tags.transaction
-        // event.contexts.event = {event}
-        // console.log(event)
-        // console.log(event.level);
-        // if (event.level == "error") {
-        //   Sentry.showReportDialog({ eventId: event.event_id });
-        // }
-        // console.log(event.request.headers)
-        // console.log(event.exception.values[0].stacktrace)
         return event
     },
     enableTracing: true,
@@ -83,9 +68,9 @@ Sentry.init({
         new Sentry.Integrations.Http({ 
             tracing: true,
          }),
-        new ProfilingIntegration({
+        // new ProfilingIntegration({
         
-        }),
+        // }),
         // new Tracing.Integrations.GraphQL(),
         new Tracing.Integrations.Express({
             app: server,
@@ -123,7 +108,9 @@ Sentry.init({
     // tracesSampleRate: 1.0,
     beforeSendTransaction(event) {
         // console.log("------")
+        // console.log(event.contexts.trace.trace_id)
 
+        // console.log(event.contexts.trace.trace_id)
         // if(event.transaction == "GET /Transaction"){
         //     return null
         // }
@@ -138,7 +125,7 @@ Sentry.init({
         //         city: "baltimore"
         //     }
         // }
-
+        // console.log(event)
         // console.log("after", event.user)
 
         return event
@@ -156,10 +143,9 @@ console.log("234u23u")
 
 
 
-console.log("main1")
-console.log("tehiwqerhweiu")
-console.log("ewijrhwoirhjew")
-console.log("main2")
+console.log("new Env", process.env.newENV)
+console.log("newENV2", process.env.newENV2)
+console.log("-----")
 // const res = await request({
 //   url: 'https://www.googleapis.cosdfsfdm/discovery/v1/apis/',
 // });
@@ -172,7 +158,9 @@ console.log("main2")
 //     message: "Authenticated user password",
 //     level: "info",
 //   });
-
+Sentry.setUser({
+    username: "testing"
+})
 
 Sentry.addBreadcrumb({
     message: "hello testing custom breadcrumb",
@@ -200,9 +188,20 @@ Sentry.addBreadcrumb({
 // })
 // console.log(Sentry.getCurrentHub().getClient()._options.integrations)
 
-Sentry.setContext("unreal", {
-    crash_type: "Ensure",
+Sentry.setContext("Subscription", {
+    id: "1181647380387201026",
+    user_id: "1116425412725964800",
+    quantity: "1",
   });
+
+Sentry.setContext("Subscription2", {
+    testing: "helloaskdjadja"
+} )
+
+Sentry.setContext("Subscription3", {
+    testing: "helloaskdjadja"
+} )
+
 
 Sentry.setExtra("test", {
     name: "testing",
@@ -225,11 +224,12 @@ app.use(Sentry.Handlers.requestHandler());
 // console.log("SCOPE",Sentry.getCurrentHub().getScope())
 
 // console.log("CLIENT",Sentry.getCurrentHub().getClient())
+// Sentry.withScope(function (scope) {
+//     // group errors together based on their request and response
+//     scope.setFingerprint(["method", "path", "String(err.statusCode)"]);
+//     Sentry.captureException(new Error("testing custom fingerprint"));
+//   });
 
-Sentry.withScope(function (scope) {
-    scope.setTag("LOCALTAG", "LOCALVALUE")
-    // Sentry.captureException(new Error("test?"))
-    app.use(Sentry.Handlers.errorHandler());
 
 
 
@@ -276,10 +276,11 @@ app.get('/', function mainHandler(req, res) {
 
 
 app.get('/gaxios', async function mainHandler(req,respppp) {
-    const res = request({
-        url: 'https://www.googlesdgjhsdkjfsdy/v1/apis/',
-    });
-
+    Sentry.withScope(function (scope) {
+        // group errors together based on their request and response
+        scope.setFingerprint(["method", "path", "String(err.statusCode)"]);
+        Sentry.captureException(new Error("testing custom fingerprint"));
+      });
     res.send("gaxios")
 })
 
@@ -331,7 +332,7 @@ app.get('/debug', function rootHandler(req,res) {
         res.send("hi")
     }
 })
-})
+
 
 app.get('/newError', async function mainHandler(req,res) {
     Sentry.captureException(new Error(error))
@@ -468,9 +469,9 @@ app.get('/Transaction', async function mainHandler(req, res) {
     }
     const transaction = Sentry.startTransaction({name: "hello"})
     Sentry.getCurrentHub().configureScope((scope) => scope.setSpan(transaction));
-    transaction.setMeasurement("memoryUsed", 123, "byte");
-    transaction.setMeasurement("ui.footerComponent.render", 1.3, "second");
-    transaction.setMeasurement("localStorageRead", 4);
+    transaction.setMeasurement("memoryUsed", Math.floor(Math.random() * 100) + 1, "byte");
+    transaction.setMeasurement("ui.footerComponent.render", Math.floor(Math.random() * 100) + 1, "second");
+    transaction.setMeasurement("localStorageRead", Math.floor(Math.random() * 100) + 1);
     transaction.setMeasurement("localStorage_Read", 10);
     transaction.setMeasurement("localStorage.Read_time", 11230);
     transaction.setMeasurement("localStorage.Read", 1123333);
@@ -521,6 +522,12 @@ app.get('/T2', function mainHandler(req,res) {
 
 
 })
+
+app.get('/envError', function mainHandler(req, res) {
+    Sentry.captureException(new Error("test env"))
+    res.send("env error")
+})
+
 
 app.get('/axios', function mainHandler(req, res) {
     axios.get("/sdsd")
