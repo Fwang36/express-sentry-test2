@@ -1,12 +1,11 @@
 import express from "express";
 import * as Sentry from '@sentry/node';
-import * as Tracing from '@sentry/tracing';
 import logger from 'morgan'
 import * as Sentry2 from '@sentry/node';
 import { RewriteFrames } from "@sentry/integrations";
 import axios from "axios";
 import cors from "cors"
-// import { ProfilingIntegration } from "@sentry/profiling-node";
+import { ProfilingIntegration } from "@sentry/profiling-node";
 import morgan from "morgan"
 import { makeid, return10 } from "./randoms.js";
 import fs from "fs";
@@ -17,6 +16,11 @@ import {request} from 'gaxios'
 const app = express()
 const server = express()
 app.use(cors())
+
+function generateRandomSixDigit() {
+    return Math.floor(100000 + Math.random() * 900000);
+  }
+
 
 
 Sentry.init({
@@ -29,9 +33,10 @@ Sentry.init({
     // environment: "GroupTest",
     // includeLocalVariables: true,
     dist: "2",
+    // attachStacktrace: true,
     // tracePropagationTargets: ['127'],
     // sampleRate: env == "production" ? 1 : 1,
-    release: "hello@123",
+    release: "hello@125",
     sendDefaultPii: true,
 
     // sampleRate: 0,
@@ -52,7 +57,7 @@ Sentry.init({
 // ],
 
     beforeSend(event, hint) {
-
+        console.log("sent error")
         return event
     },
     enableTracing: true,
@@ -68,17 +73,28 @@ Sentry.init({
         new Sentry.Integrations.Http({ 
             tracing: true,
          }),
-        // new ProfilingIntegration({
+        new ProfilingIntegration({
         
-        // }),
+        }),
         // new Tracing.Integrations.GraphQL(),
-        new Tracing.Integrations.Express({
-            app: server,
+        new Sentry.Integrations.Express({
+            server: app,
         }),
         new Sentry.Integrations.Mysql({
 
         }),
 
+        new RewriteFrames({
+            iteratee: (frame) => {
+                // console.log("------")
+                // console.log(frame)
+                // console.log(frame)
+                // let newFile = frame.filename.replace(/\//g, "\\")
+                // console.log(newFile)
+                // frame.filename = newFile
+                return frame
+            }
+        }),
 
         new Sentry.Integrations.LocalVariables({
             captureAllExceptions: true,
@@ -98,15 +114,20 @@ Sentry.init({
     // },
     profilesSampleRate:  1.0,
     tracesSampler: (samplingContext) => {
-        
-        // console.log("request", request)
-        // let sample = 0
-        // console.log("CONTEXT", samplingContext)
-        // console.log("REQUEST", samplingContext.transactionContext.metadata.request.socket.server)
+        // console.log(samplingContext)
+
+        // if (!samplingContext.parentSampled) {
+        //     return 1
+        // }
+        // // console.log("SAMPLINGCONTEXT", samplingContext)
+        // // console.log(samplingContext.request.headers['user-agent'])
+        // return 0
         return 1
     },
+    
     // tracesSampleRate: 1.0,
     beforeSendTransaction(event) {
+        
         // console.log("------")
         // console.log(event.contexts.trace.trace_id)
 
@@ -133,14 +154,6 @@ Sentry.init({
 });
 
 // console.log(Sentry.getCurrentHub().getClient()._integrations)
-Sentry.setTag("hi.123", "hello")
-
-console.log("new branch")
-
-
-
-console.log("234u23u")
-
 
 
 console.log("new Env", process.env.newENV)
@@ -152,7 +165,6 @@ console.log("-----")
 
 // console.log(res)
 
-
 // Sentry.addBreadcrumb({
 //     // category: "auth",
 //     message: "Authenticated user password",
@@ -161,6 +173,32 @@ console.log("-----")
 Sentry.setUser({
     username: "testing"
 })
+
+Sentry.setContext("newContext", {
+    testingContext: null,
+    testingContext2: "hello",
+    testingAuth: "password",
+    testingAuth2: null
+}),
+
+Sentry.setExtra("newContext", {
+    testingContext: null,
+    // testingContext2: "hello",
+    // testingAuth: "password",
+    testingAuth2: null
+}),
+
+Sentry.setExtra("TestingExtra", "Tesintgafdkjasd")
+
+Sentry.setExtra("TestingExtra2", "auth")
+
+Sentry.setExtra("TestingExtra3", null)
+
+
+Sentry.setExtra("newContext2", {
+    // testingContext: null,
+    testingAuth2: null
+}),
 
 Sentry.addBreadcrumb({
     message: "hello testing custom breadcrumb",
@@ -182,44 +220,15 @@ Sentry.addBreadcrumb({
         new: "auth"
     }
           });
-// Sentry.setExtra("ext", {
-//     params: "auth",
-//     request: "testing"
-// })
-// console.log(Sentry.getCurrentHub().getClient()._options.integrations)
 
-Sentry.setContext("Subscription", {
-    id: "1181647380387201026",
-    user_id: "1116425412725964800",
-    quantity: "1",
-  });
-
-Sentry.setContext("Subscription2", {
-    testing: "helloaskdjadja"
-} )
-
-Sentry.setContext("Subscription3", {
-    testing: "helloaskdjadja"
-} )
-
-
-Sentry.setExtra("test", {
-    name: "testing",
-    params: "auth"
-})
-
-const client = Sentry.getCurrentHub().getClient();
-
-// lifecycle hook to capture an event
-
-// if (client) {
-//   client.on('beforeEnvelope', (envelope) => console.log(envelope));
-// }
-// app.use(morgan("combined"))
 
 app.use(Sentry.Handlers.tracingHandler());
 app.use(Sentry.Handlers.requestHandler());
 
+
+const expensiveFunction = () => {
+    return console.log("helloede")
+}
 // console.log("HUB", Sentry.getCurrentHub())
 // console.log("SCOPE",Sentry.getCurrentHub().getScope())
 
@@ -230,10 +239,74 @@ app.use(Sentry.Handlers.requestHandler());
 //     Sentry.captureException(new Error("testing custom fingerprint"));
 //   });
 
+const obj1 = {
+    data: 'abc',
+
+    };
+
+const map1 = new Map();
+map1.set('a', 1);
+
+// throw map1;
+console.log(map1)
+
+app.get("/map", function mainHandler(req,res) {
+    Sentry.captureException(new Error(map1))
+    Sentry.captureMessage(map1)
+    res.send(map1.entries())
+})
+
+app.get("/message", function mainHandler(req,res) {
+
+    const scope = Sentry.getCurrentHub().getScope();
+    const parentSpan = scope.getSpan();
+    
+    console.log(parentSpan.spanRecorder)
+
+    const span = parentSpan?.startChild({
+        description: "SELECT * FROM usertable",
+        op: 'db',
+        origin: 'auto.db.postgres',
+        'db.system': 'postgres'
+      });
 
 
+      span.end()
+      console.log(parentSpan.spanRecorder)
+
+    Sentry.captureMessage("testing")
+    res.send("message done")
+})
+
+// app.get("/debug", async (req, res) => {
+
+//     const scope = Sentry.getCurrentHub().getScope();
+//     const parentSpan = scope.getSpan();
+//     console.log("BEFORE DATABASE", parentSpan.spanRecorder)
+
+//     try {
+//       const result = await db.query("SELECT * FROM usertable");
+
+//       console.log("AFTER DATABASE", parentSpan.spanRecorder)  
+
+//       res.json(result.rows);
+//     } catch (err) {
+//       console.error(err);
+//       res.status(500).send("Internal Server Error");
+//     }
+// });
 
 
+app.get("/object", function mainHandler(req,res) {
+
+    console.log(obj1)
+
+    Sentry.captureException(obj1)
+
+    Sentry.captureException(new Error(obj1))
+
+    res.send("done")
+})
 app.get("/apicall", function mainHandler(req, res) {
     let varOne
     let varTwo
@@ -261,15 +334,7 @@ app.get("/apicall", function mainHandler(req, res) {
 })
 
 app.get('/', function mainHandler(req, res) {
-    const transaction = Sentry.getCurrentHub().getScope().getTransaction()
 
-    if (transaction) {
-
-        console.log("transFound", transaction)
-        transaction.op = "test"
-        console.log("after", transaction)
-        res.send("hi2")
-    }
     res.send('hi')
 });
 
@@ -333,9 +398,19 @@ app.get('/debug', function rootHandler(req,res) {
     }
 })
 
+app.get('/testMessage', function mainHandler(req, res) {
+    Sentry.captureMessage(`This is a test: SW${generateRandomSixDigit()}`)
+    res.send("done")
+})
 
-app.get('/newError', async function mainHandler(req,res) {
-    Sentry.captureException(new Error(error))
+
+app.get('/newError', function mainHandler(req,res) {
+    Sentry.captureException(new Error("testing"), {
+        tags: {
+            http_status_code: "500",
+            http_status_code2: 400,
+        }
+    })
     res.send("hello")
 })
 
@@ -457,56 +532,62 @@ app.get('/ret', function mainHandler(req,res) {
 
 app.get('/pro', function mainHandler(req, res) {
 
-    const promise2 = new Promise((resolve, reject) => {
-        setTimeout(reject(new Error("fail")), 100);
-    });
-    console.log(promise2)
+    async function throwErrorAsync(){
+        return Promise.reject(new Error());
+    }
+        
+    const error = Promise.all([throwErrorAsync(), throwErrorAsync()]).catch((error) => Sentry.captureException(error))
 })
+
+Sentry.spanCont
 
 app.get('/Transaction', async function mainHandler(req, res) {
     if (Sentry.getCurrentHub().getScope().getTransaction()){
-        Sentry.getCurrentHub().getScope().getTransaction().finish()
-    }
-    const transaction = Sentry.startTransaction({name: "hello"})
-    Sentry.getCurrentHub().configureScope((scope) => scope.setSpan(transaction));
-    transaction.setMeasurement("memoryUsed", Math.floor(Math.random() * 100) + 1, "byte");
-    transaction.setMeasurement("ui.footerComponent.render", Math.floor(Math.random() * 100) + 1, "second");
-    transaction.setMeasurement("localStorageRead", Math.floor(Math.random() * 100) + 1);
-    transaction.setMeasurement("localStorage_Read", 10);
-    transaction.setMeasurement("localStorage.Read_time", 11230);
-    transaction.setMeasurement("localStorage.Read", 1123333);
-    transaction.setMeasurement("localStorage.Read.hello.jordan", 1123333);
 
-    await fetch("https://http.cat/200")
-    .then(response => {
-        console.log(response)
-    })
-    .catch(error => {
-        console.error(error)
-        Sentry.captureException(error)
-    })
-    // const transSpan = Sentry.startTransaction({name: "TESTSPAN"})
+        console.log(Sentry.getCurrentHub().getScope().getTransaction())
+        const transaction = Sentry.getCurrentHub().getScope().getTransaction()
+
+        // Sentry.getCurrentHub().getScope().getTransaction().transaction._name = "nameChange2"
+        transaction.setName("nameChange4")
+        console.log(transaction)
+        // Sentry.getCurrentHub().getScope().getTransaction().finish()
+    }
+    // const result = Sentry.startSpan({ name: "Important Function" }, () => {
+    //     return expensiveFunction();
+    //   });
+
+
+    // console.log(result)
+
+            // const transSpan = Sentry.startTransaction({name: "TESTSPAN"})
+            // transaction.setMeasurement("memoryUsed", Math.floor(Math.random() * 100) + 1, "byte");
+            // transaction.setMeasurement("ui.footerComponent.render", Math.floor(Math.random() * 100) + 1, "second");
+            // transaction.setMeasurement("localStorageRead", Math.floor(Math.random() * 100) + 1);
+            // transaction.setMeasurement("localStorage_Read", 10);
+            // transaction.setMeasurement("localStorage.Read_time", 11230);
+            // transaction.setMeasurement("localStorage.Read", 1123333);
+            // transaction.setMeasurement("localStorage.Read.hello.jordan", 1123333);
 
     // Sentry.getCurrentHub().configureScope(scope => scope.setSpan(transSpan));
     
-    const span = transaction.startChild({
-        data: {
-            // transSpan
-        },
-        op: 'auth',
-        description: `59d74293-5def-4384-bfa4-c604a0687bb2`,
-    });
+    // const span = transaction.startChild({
+    //     data: {
+    //         // transSpan
+    //     },
+    //     op: 'auth',
+    //     description: `59d74293-5def-4384-bfa4-c604a0687bb2`,
+    // });
 
-     span.finish()
-     transaction.finish()
-     try{
+    //  span.finish()
+    //  transaction.finish()
+    //  try{
 
-         Sentry.captureException(new Error("test span error"))
-     } finally {
+    //      Sentry.captureException(new Error("test span error"))
+    //  } finally {
 
-        //  transaction.setStatus("internal_error")
-         transaction.finish()
-     }
+    //     //  transaction.setStatus("internal_error")
+    //     //  transaction.finish()
+    //  }
     // transSpan.finish()
    
     res.send("done")
