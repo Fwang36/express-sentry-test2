@@ -36,7 +36,7 @@ Sentry.init({
     // attachStacktrace: true,
     // tracePropagationTargets: ['127'],
     // sampleRate: env == "production" ? 1 : 1,
-    release: "hello@125",
+    release: "testDeployEmail",
     sendDefaultPii: true,
 
     // sampleRate: 0,
