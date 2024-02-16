@@ -8,7 +8,6 @@ import cors from "cors"
 import { ProfilingIntegration } from "@sentry/profiling-node";
 import morgan from "morgan"
 import { makeid, return10 } from "./randoms.js";
-import {request} from 'gaxios'
 
 
 // const Sentry = require("@sentry/node")
