@@ -5,9 +5,11 @@ import * as Sentry2 from '@sentry/node';
 import { RewriteFrames } from "@sentry/integrations";
 import axios from "axios";
 import cors from "cors"
-import { ProfilingIntegration } from "@sentry/profiling-node";
+import { nodeProfilingIntegration } from "@sentry/profiling-node";
 import morgan from "morgan"
 import { makeid, return10 } from "./randoms.js";
+
+
 
 
 // const Sentry = require("@sentry/node")
@@ -71,9 +73,11 @@ Sentry.init({
         new Sentry.Integrations.Http({ 
             tracing: true,
          }),
-        new ProfilingIntegration({
+        //  nodeProfilingIntegration(),
         
-        }),
+        // new ProfilingIntegration({
+        
+        // }),
         // new Tracing.Integrations.GraphQL(),
         new Sentry.Integrations.Express({
             server: app,
@@ -168,6 +172,9 @@ console.log("-----")
 //     message: "Authenticated user password",
 //     level: "info",
 //   });
+
+Sentry.addIntegration(nodeProfilingIntegration());
+
 Sentry.setUser({
     username: "testing"
 })
@@ -256,23 +263,11 @@ app.get("/map", function mainHandler(req,res) {
 
 app.get("/message", function mainHandler(req,res) {
 
-    const scope = Sentry.getCurrentHub().getScope();
-    const parentSpan = scope.getSpan();
-    
-    console.log(parentSpan.spanRecorder)
-
-    const span = parentSpan?.startChild({
-        description: "SELECT * FROM usertable",
-        op: 'db',
-        origin: 'auto.db.postgres',
-        'db.system': 'postgres'
-      });
-
-
-      span.end()
-      console.log(parentSpan.spanRecorder)
-
-    Sentry.captureMessage("testing")
+    Sentry.setTag("test", "123")
+    Sentry.captureMessage("[123][456]testing123")
+    Sentry.captureMessage("[123][45442323236]testing456")
+    Sentry.captureMessage("789")
+    Sentry.captureMessage("23489234")
     res.send("message done")
 })
 
@@ -459,6 +454,12 @@ app.get('/attach', function mainHandler(req, res) {
 app.get('/throw', (req, res) => {
     throw new Error("thrown")
     res.send("thrown")
+})
+
+
+app.get("/client", (req, res) => {
+    console.log(Sentry.getClient()._integrations)
+    res.send("done")
 })
 
 
