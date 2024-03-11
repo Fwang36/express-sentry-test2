@@ -11,6 +11,8 @@ import { makeid, return10 } from "./randoms.js";
 
 console.log("commit1")
 console.log("commit2")
+console.log("commit3")
+
 
 // const Sentry = require("@sentry/node")
 const app = express()
