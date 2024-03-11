@@ -9,7 +9,7 @@ import { nodeProfilingIntegration } from "@sentry/profiling-node";
 import morgan from "morgan"
 import { makeid, return10 } from "./randoms.js";
 
-
+console.log("commit1")
 
 
 // const Sentry = require("@sentry/node")
