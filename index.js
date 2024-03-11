@@ -10,7 +10,7 @@ import morgan from "morgan"
 import { makeid, return10 } from "./randoms.js";
 
 console.log("commit1")
-
+console.log("commit2")
 
 // const Sentry = require("@sentry/node")
 const app = express()
